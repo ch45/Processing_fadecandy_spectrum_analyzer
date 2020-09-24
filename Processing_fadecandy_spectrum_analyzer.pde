@@ -25,7 +25,7 @@ public void setup() {
   size(720, 480, P2D);
 
   // Connect to the local instance of fcserver
-  opc = new OPC(this, "middle", 7890);
+  opc = new OPC(this, "127.0.0.1", 7890);
 
   spacing = (float)min(height / (boxesDown * ledsDown + 1), width / (boxesAcross * ledsAcross + 1));
   x0 = (int)(width - spacing * (boxesAcross * ledsAcross - 1)) / 2;
