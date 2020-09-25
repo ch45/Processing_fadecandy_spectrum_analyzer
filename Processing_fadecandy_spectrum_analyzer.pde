@@ -15,9 +15,6 @@ int y0;
 
 // for exit, fade in and fade out
 int exitTimer = 0;
-int start_ms = 0;
-int fadeLevel = 100;
-boolean fadeInDone = false;
 
 public void setup() {
   apply_cmdline_args();
@@ -48,7 +45,7 @@ public void draw() {
     for (int x = 0; x < boxesAcross * ledsAcross; x++) {
       c = color((int)random(256), (int)random(256), (int)random(256));  // Define color 'c'
       fill(c);
-      square(x0 + spacing * x, y0 + spacing * y, spacing);
+      square(x0 + spacing * x - spacing / 2, y0 + spacing * y - spacing / 2, spacing);
     }
   }
 
@@ -78,7 +75,7 @@ int getRandomColourPart(int c) {
   String tmpColourName = tmpColourNames[partIndex];
   print(" extracted " + String.format("%5s", tmpColourName));
 
-  while (partIndex-- > 0) { c = c >> 8; }
+  while (partIndex-- > 0) { c >>>= 8; }
   return c & 0xFF;
 }
 
