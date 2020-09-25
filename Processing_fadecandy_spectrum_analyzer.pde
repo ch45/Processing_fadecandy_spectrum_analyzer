@@ -17,6 +17,7 @@ int y0;
 int exitTimer = 0;
 
 public void setup() {
+
   apply_cmdline_args();
 
   size(720, 480, P2D);
@@ -39,8 +40,10 @@ public void setup() {
 }
 
 public void draw() {
-  noStroke();
+
   color c = 0;
+
+  noStroke();
   for (int y = 0; y < boxesDown * ledsDown; y++) {
     for (int x = 0; x < boxesAcross * ledsAcross; x++) {
       c = color((int)random(256), (int)random(256), (int)random(256));  // Define color 'c'
@@ -81,17 +84,19 @@ int getRandomColourPart(int c) {
 
 void apply_cmdline_args()
 {
+
   if (args == null) {
     return;
   }
+
   for (String exp: args) {
-      String[] comp = exp.split("=");
-      switch (comp[0]) {
-        case "exit":
-          exitTimer = parseInt(comp[1], 10);
-          println("exit after " + exitTimer + "s");
-          break;
-      }
+    String[] comp = exp.split("=");
+    switch (comp[0]) {
+    case "exit":
+      exitTimer = parseInt(comp[1], 10);
+      println("exit after " + exitTimer + "s");
+      break;
+    }
   }
 }
 
@@ -106,3 +111,4 @@ void check_exit() {
     exit();
   }
 }
+
