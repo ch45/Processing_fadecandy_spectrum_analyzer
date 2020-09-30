@@ -2,6 +2,15 @@
  * Processing_fadecandy_spectrum_analyzer.pde
  */
 
+import ddf.minim.analysis.*;
+import ddf.minim.*;
+
+Minim minim;
+AudioPlayer sound; // mp3 input
+// AudioInput sound; // microphone input
+FFT fftLog;
+final int maxAmplitude = 255;
+
 OPC opc;
 
 final int boxesAcross = 2;
@@ -12,6 +21,9 @@ final int ledsDown = 8;
 float spacing;
 int x0;
 int y0;
+
+final color setColour = color(200, 150, 100);
+final color unsetColour = color(0, 0, 50);
 
 // for exit, fade in and fade out
 int exitTimer = 0;
@@ -37,53 +49,62 @@ public void setup() {
       ledCount += ledsAcross * ledsDown;
     }
   }
+
+  minim = new Minim(this);
+
+  sound = minim.loadFile("083_trippy-ringysnarebeat-3bars.mp3", 1024);  // mp3 input
+  // sound = minim.getLineIn(Minim.MONO, 1024); // microphone input
+
+  // loop the file
+  sound.loop(); // mp3 input
+
+  // create an FFT object for calculating logarithmically spaced averages
+  fftLog = new FFT(sound.bufferSize(), sound.sampleRate()); // may fail if the microphone device is already in use!
+
+  fftLog.logAverages(22, 3);
+  // fftLog.logAverages(11, 1);
 }
 
+// draw the display like it is the descrete LEDs
 public void draw() {
 
-  color c = 0;
+  fftLog.forward(sound.mix);
+  int numSpectrumBars = fftLog.avgSize();
 
-  noStroke();
-  for (int y = 0; y < boxesDown * ledsDown; y++) {
-    for (int x = 0; x < boxesAcross * ledsAcross; x++) {
-      c = color((int)random(256), (int)random(256), (int)random(256));  // Define color 'c'
-      fill(c);
-      square(x0 + spacing * x - spacing / 2, y0 + spacing * y - spacing / 2, spacing);
-    }
+  float horizRatio = (float)numSpectrumBars / (boxesAcross * ledsAcross);
+
+  if (horizRatio > 1.0) { // map every one, 2nd or 3rd etc. to the display
+    horizRatio = floor(horizRatio);
   }
 
-  // debug only - dump the last colour used
-  dumpColour(c);
+  int startBar = (int)(numSpectrumBars - horizRatio * boxesAcross * ledsAcross);
+  if (startBar >= 2) { // use the middle of the spectrum in the display
+    startBar /= 2;
+  }
 
-  // get a random colour part (r, g or b)
-  int testColour = getRandomColourPart(c);
-  println(" " + String.format("%02x", testColour));
+  float vertLogarithm = pow(maxAmplitude, (1.0 / (boxesDown * ledsDown)));
+
+  background(0);
+  noStroke();
+
+  for (int x = 0; x < boxesAcross * ledsAcross; x++) {
+    float vertMax = maxAmplitude; // pow(vertLogarithm, boxesDown * ledsDown);
+    int curSpectrumBar = (int)(startBar + horizRatio * x);
+    // float freq = fftLog.getAverageCenterFrequency(curSpectrumBar);
+    float amplitude = fftLog.getBand(curSpectrumBar);
+
+    for (int y = 0; y < boxesDown * ledsDown; y++) {
+      vertMax /= vertLogarithm;
+      int c = (amplitude > vertMax) ? setColour : unsetColour; 
+      fill(c);
+      square(x0 + spacing * x - spacing / 2, y0 + spacing * y - spacing / 2, spacing - 1);
+    }
+  }
 
   check_exit();
 }
 
-// nod to https://processing.org/reference/rightshift.html
-void dumpColour(int c) {
-  int r = (c >> 16) & 0xFF;  // Faster way of getting red(argb)
-  int g = (c >> 8) & 0xFF;   // Faster way of getting green(argb)
-  int b = c & 0xFF;
-  print(String.format("%02x", r) + " " + String.format("%02x", g) + " " + String.format("%02x", b));
-}
-
-int getRandomColourPart(int c) {
-  int partIndex = (int)random(3.0);
-
-  // debug only
-  String[] tmpColourNames = {"blue", "green", "red"};
-  String tmpColourName = tmpColourNames[partIndex];
-  print(" extracted " + String.format("%5s", tmpColourName));
-
-  while (partIndex-- > 0) { c >>>= 8; }
-  return c & 0xFF;
-}
-
-void apply_cmdline_args()
-{
+void apply_cmdline_args() {
 
   if (args == null) {
     return;
@@ -111,4 +132,3 @@ void check_exit() {
     exit();
   }
 }
-

@@ -19,3 +19,12 @@ rem Windows
 \# raspi (ssh i.e. headless)
 
     xvfb-run processing-java --sketch=./Processing_fadecandy_spectrum_analyzer --run exit=60
+
+Code sample, return a random colour part
+----------------------------------------
+
+    int getRandomColourPart(int c) {
+      int partIndex = (int)random(3.0);
+      while (partIndex-- > 0) { c >>>= 8; }
+      return c & 0xFF;
+    }

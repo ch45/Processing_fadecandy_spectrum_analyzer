@@ -5,3 +5,6 @@ discards*
 _*
 ~$*
 *.autosave
+data/*
+!083_trippy-ringysnarebeat-3bars.mp3
+*~
