@@ -12,6 +12,8 @@ FFT fftLog;
 final int maxAmplitude = 255;
 
 OPC opc;
+final String fcServerHost = "127.0.0.1";
+final int fcServerPort = 7890;
 
 final int boxesAcross = 2;
 final int boxesDown = 2;
@@ -25,17 +27,15 @@ int y0;
 final color setColour = color(200, 150, 100);
 final color unsetColour = color(0, 0, 50);
 
-// for exit, fade in and fade out
-int exitTimer = 0;
+int exitTimer = 0; // Run forever unless set by command line
 
-public void setup() {
+void setup() {
 
   apply_cmdline_args();
 
   size(720, 480, P2D);
 
-  // Connect to the local instance of fcserver
-  opc = new OPC(this, "127.0.0.1", 7890);
+  opc = new OPC(this, fcServerHost, fcServerPort); // Connect to an instance of fcserver
 
   spacing = (float)min(height / (boxesDown * ledsDown + 1), width / (boxesAcross * ledsAcross + 1));
   x0 = (int)(width - spacing * (boxesAcross * ledsAcross - 1)) / 2;
@@ -101,6 +101,9 @@ public void draw() {
     }
   }
 
+  fill(128);
+  text(String.format("%5.1f fps", frameRate), 5, 15);
+
   check_exit();
 }
 
@@ -129,6 +132,7 @@ void check_exit() {
 
   int m = millis();
   if (m / 1000 >= exitTimer) {
+    println(String.format("average %.1f fps", (float)frameCount / exitTimer));
     exit();
   }
 }

@@ -2,8 +2,6 @@
 Processing fadecandy spectrum analyzer
 --------------------------------------
 
-But it's not yet, is a WIP...
-
 Cmd Line
 --------
 
